@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- 必须的设置 -->
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>室内定位</title>
+	<link rel="shortcut icon" type="image/ico" href="../../../images/favicon.ico">
+	<script src="//apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+	<link href="css/common.css" rel="stylesheet">
+	<script src="js/jweixin-1.3.2.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/alertLayer.css">
+    <style>
+		.btn-default {
+		    color: #333;
+		    background-color: #fff;
+		    border-color: #ccc;
+		    cursor: pointer;
+		    border-radius: 4px;
+		}
+		.viewmode-group {
+		    position: absolute;
+		    top: 100px;
+		    right: 10px;
+		    left: auto;
+		}
+		#people,#car{
+			width: 32px;
+			height: 32px;
+		}
+		#btn2D,#btn3D{
+			width: 32px;
+			height: 32px;
+		}
+		@media screen and (min-width:824px){
+			#btn2D,#btn3D{
+				width: 42px;
+				height: 42px;
+		}
+    }
+	</style>
+</head>
+<body>
+	<div id="loading" style="display: block;position:absolute;width:100px;height:32px;left:50%;margin-left:-50px;top:50%; margin-top:-16px;text-align:right">正在加载...</div>
+	<div id="map-container">
+		<div class="searchButton-module" id="searchButton-module">
+            <input type="text" disabled="disabled" placeholder="店铺/设施/车牌号/车位号">
+            <a class="close"></a>
+        </div>
+        <!--起点、终点 选择-->
+        <div class="startEndPoint-module" id="startEndPoint-module">
+            <div class="btn-back"><a class="btn"></a></div>
+            <div class="show-box">
+                <div class="item-box start-box"><input type="text" placeholder="请选择起点位置" readonly="readonly" /></div>
+                <div class="item-box end-box"><input type="text" placeholder="请选择终点位置" readonly="readonly" /></div>
+            </div>
+            <div class="btn-change"><a class="btn"></a></div>
+        </div>
+         <!--导航结束-->
+        <div class="navOverTips-module" id="navOverTips-module">
+            <div class="left-box">
+                <div class="start-text">-</div>
+                <div class="end-text">-</div>
+                <div class="tips-text">减掉 <b>0</b>克 脂肪</div>
+            </div>
+            <div class="right-box">
+                <div class="act-icon"></div>
+                <div class="text">全长 <b>0</b>米</div>
+            </div>
+        </div>
+        <div class="bottom-module">
+         	<!--我的位置-->
+            <div class="location-control location" id="location-button"></div>
+	        <!--poi 详情-->
+	        <div class="change-control poiInfo-control" id="poiInfo-control" style=" display: none;">
+	            <div class="close"></div>
+	            <div class="goBtn">到这去</div>
+	            <div class="info-box">
+	                <div class="p1">-</div>
+	                <div class="p3">当前停放 <span></span></div>
+	                <div class="p2">-</div>
+	            </div>
+	            <div class="btn-box">
+	                <a><!--返回--></a>
+	                <a class="btn-start">设为起点</a>
+	                <a class="btn-end">设为终点</a>
+	            </div>
+	        </div>
+	        <!--开始导航-->
+            <div class="change-control startNav-control off" id="startNav-control" style=" display: none;">
+                <div class="info-box">
+                    <p class="p1">-</p>
+                    <p class="p2">-</p>
+                </div>
+                <a class="start-btn">导航</a>
+                <label class="slide-button" id="navitype">
+			        <input type="checkbox">
+			        <span></span>
+			        <span id="car1"></span>
+			        <span id="ren1"></span>
+			    </label>
+            </div>
+             <!--导航中，查看导航路径-->
+            <div class="change-control navingBomButton-control" id="navingBomButton-control" style=" display: none;">
+                <div class="box">
+                    <div class="close"></div>
+                    <div class="btn-box">
+                        <div class="btn b-overview">
+                           	结束导航
+                            <div class="li">
+                                <a class="start">起点层</a>
+                                <a class="end">终点层</a>
+                            </div>
+                        </div>
+                        <div class="btn b-continue">继续导航</div>
+                        <div class="btn b-backmap">返回地图</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+	</div>
+ 	<!--搜索页-->
+    <div class="search-container">
+        <div class="head-module" id="head-module">
+            <div class="back-button"></div>
+            <div class="box-control">
+                <div class="floor-box">
+                    <div id="floorNum" class="box" floor-id="">全部</div>
+                    <ul id="floorlist" class="ul scrollStyle">
+                    </ul>
+                </div>
+                <div class="input-box">
+                    <input type="text" placeholder="店铺/设施/车牌号/车位号">
+                    <a class="close"></a>
+                    <a class="submit">搜 索</a>
+                </div>
+            </div>
+
+        </div>
+        <div class="content-module">
+            <!--选点-->
+            <div class="locationPoint-control" id="locationPoint-control" style=" display: none;">
+                <a class="myPoint">我的位置</a>
+                <a class="mapPoint">地图选点</a>
+            </div>
+            <!--设施-->
+            <div class="facility-control" id="facility-control">
+                <div class="box">
+                <div class="item-box itemBtn" data-cid="62">						
+	                <img src="images/search/dianti.jpg" class="disabled">						
+	                <span class="disabled">电梯</span>				
+                </div>
+                <div class="item-box itemBtn" data-cid="61">
+					<img src="images/search/futi.jpg" class="disabled">		
+					<span class="disabled">扶梯</span>					
+				</div>
+   				<div class="item-box itemBtn" data-cid="56">	
+					<img src="images/search/manwc.jpg" class="disabled">				
+					<span class="disabled">洗手间</span>		
+				</div>
+				<div class="item-box itemBtn" data-cid="60">						
+					<img src="images/search/louti.jpg" class="disabled">					
+					<span class="disabled">楼梯</span>				
+				</div>
+				</div>
+                <div class="moveBtn"></div>
+            </div>
+            <!--搜索结果-->
+            <div class="sResult-control" id="sResult-control" style=" display: none;">
+                <ul></ul>
+                <p class="tips">-</p>
+            </div>
+            <!--历史记录-->
+            <div class="sHistory-control" id="sHistory-control">
+                <ul class="list"></ul>
+                <div class="empty-btn">您暂未搜索任何记录!</div>
+            </div>
+        </div>
+        <div class="select-floor-module" id="select-floor-module">
+            <div class="head-box">
+                <div class="close"></div>
+                <div class="title">请选择结果分布的楼层</div>
+            </div>
+            <div class="content-box scrollStyle">
+                <ul>
+                    <li>F1层 <b>(20)</b></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+	<div class="viewmode-group" data-toggle="buttons">
+		<img id="btn2D" src="../../../plug-in/esmap/resource/style/wedgets/img/MODE_2D.png" class="btn-default" style="display: none;">
+		<img id="btn3D" src="../../../plug-in/esmap/resource/style/wedgets/img/MODE_3D.png" class="btn-default">
+	</div>
+	<div class="addmarker-group btn-group-vertical" data-toggle="buttons"></div> 
+	<script src="../../../plug-in/esmap/esmap.min.js"></script>
+	<script type="text/javascript" src="js/alertLayer.js"></script>
+	<script type="text/javascript" src="js/common.js"></script>
+	<script type="text/javascript" src="js/search.js"></script>
+	<script type="text/javascript" src="js/wxnav.js"></script>
+	<script src="js/basemap.js"></script>
+	<script src="js/beacon.js"></script>
+	<script src="js/algorithm.js"></script>
+    <script type="text/javascript" src="js/nav.js"></script>
+</body>
+<script type="text/javascript">
+	mapDowork();
+</script>
+</html>
